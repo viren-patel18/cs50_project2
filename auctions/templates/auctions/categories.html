@@ -1,0 +1,19 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <div class="container">
+        <h2>Categories</h2><br>
+        <ul class="list-group" style="width: 20%;">
+            {% for category in categories %}
+                <li class="list-group-item">
+                    <a href="{% url 'index' %}?category_id={{ category.id }}">{{ category }}</a>
+                    <div class="badge badge-danger" style="float: right;">
+                        {{ category.listings.all|length }}
+                    </div>
+                </li>
+            {% empty %}
+                No Categories.
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

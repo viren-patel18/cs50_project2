@@ -1,0 +1,62 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}Auctions{% endblock %}</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link href="{% static 'auctions/styles.css' %}" rel="stylesheet">
+    </head>
+    <body>
+        <div class="header">
+            <h1>Auctions</h1>
+            <div>
+                {% if user.is_authenticated %}
+                    Signed in as <strong>{{ user.username }}</strong>.
+                {% else %}
+                    Not signed in. 
+                {% endif %}
+            </div><br>
+            {% url 'index' as url_index %}
+            {% url 'create' as url_create %}
+            {% url 'categories' as url_categories %}
+            {% url 'watchlist' as url_watchlist %}
+            {% url 'logout' as url_logout %}
+            {% url 'login' as url_login %}
+            {% url 'register' as url_register %}
+            <nav class="navbar-light bg-white border-bottom" style="width: 100%;">
+                <ul class="nav nav-pills">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_index %}active{% endif %}" href="{% url 'index' %}">Active Listings</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == url_create %}active{% endif %}" href="{% url 'create' %}">Create Listing</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == url_categories %}active{% endif %}" href="{% url 'categories' %}">Categories</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == url_watchlist %}active{% endif %}" href="{% url 'watchlist' %}">Watchlist</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == url_logout %}active{% endif %}" href="{% url 'logout' %}">Log Out</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == url_login %}active{% endif %}" href="{% url 'login' %}">Log In</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == url_register %}active{% endif %}" href="{% url 'register' %}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        <br>
+        {% block body %}
+        {% endblock %}
+        <div class="footer" style="margin-top:30px; height: 60px; background-color: white; border-top: 1px darkgray solid">
+        </div>
+    </body>
+</html>

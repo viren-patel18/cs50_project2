@@ -1,0 +1,98 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <div class="container">
+        <div class="row" style="border-bottom: lightgray 1px solid;">
+            <div class="col">
+                {% if user.is_authenticated %}
+                    <a class="badge badge-{% if watchlist_flag == 1 %}light{% else %}dark{% endif %}" href="{% url 'listing' listing_id=listing.id %}?watchlist_flag={{ watchlist_flag }}">
+                        Watchlist
+                    </a>
+                {% endif %}
+                <div style="font-size: 12px; color: grey; float: right;">
+                    Created by: <span style="font-weight: bold;">{{ listing.creator }}</span> on {{ listing.timestamp }}
+                </div>
+                <br>
+                <img src="{{ listing.imageUrl }}" alt="No image available." width="500px"><br><br>
+                {% for category in categories %}
+                    <a class="badge badge-info" href="{% url 'index' %}?category_id={{ category.id }}">{{ category }}</a>
+                {% endfor %}<br><br>
+            </div>
+
+            <div class="col">
+                <br>
+                <h2>{{ listing.title }}</h2>
+                {{ listing.description }}<br><br>
+
+                {% if currentBid %}
+                    {% if listing.active %}
+                        Current Bid: <span style="font-size: 40px; color: limegreen">${{ currentBid.amount }}</span><br>
+                        <span style="font-size:12px; color:gray">{{ listing.bids.all|length }} bid(s) have been placed.</span>    
+                    {% else %}
+                        <span style="font-weight:bold; font-size: 30px; color: RED">SOLD: </span>
+                        <span style="font-size: 40px; color: limegreen">${{ currentBid.amount }}</span><br>
+                        <span style="font-size: 12px; color: grey">Auction closed by creator.</span>
+                    {% endif %}
+                {% else %}
+                    Starting Bid: <span style="font-size: 40px; color: limegreen">${{ listing.startBid }}</span><br>
+                    <span style="font-size:12px; color:gray">No bids have been placed yet.</span>
+                {% endif %}<br>
+                
+                {% if listing.active and user.is_authenticated %}
+                    {% if currentBid and currentBid.bidder == user %}
+                        <span style="font-size: 12px; color: grey">You hold the current bid.</span><br>
+                    {% endif %}
+                    <form class="form-group row" action="{% url 'listing' listing_id=listing.id %}" method="POST">
+                        {% csrf_token %}
+                        <div class="input-group col-4">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">$</span>
+                            </div>
+                            <input class="form-control" name="amount" type="number" placeholder="0.00" step="0.01" min="0" max="999999999" size="10" required="True">
+                        </div>
+                        <input class="btn btn-primary btn-md" type="Submit" value="Place Bid">
+                    </form>
+                    {% if bidMessage %}
+                        <div class="alert alert-{% if bidPlaced == 1 %}success{% else %}danger{% endif %}" style="line-height: 5px; padding:15px; vertical-align: center;">
+                            {{ bidMessage }}<br><br>
+                        </div> 
+                    {% endif %}<br><br>
+                    {% if request.user == listing.creator  %}
+                        <a class="btn btn-danger btn-sm" href="{% url 'listing' listing_id=listing.id %}?close=1">Close Auction</a><br>
+                        <span style="font-size: 12px; color: gray;">
+                            Users will no longer be able to bid. Highest bidder will be declared the winner.
+                        </span>
+                    {% endif %}
+                {% endif %}<br>
+                {% if user.is_authenticated and not listing.active and currentBid.bidder == user %}
+                    <div style="font-size: 18px; font-weight: bold;">Congratulations! You have won the bid.</div>
+                {% endif %}
+            </div>
+        </div><br>
+
+        <h6>Comments:</h6>
+        {% if user.is_authenticated %}
+            <form>
+                {% csrf_token %}
+                <textarea class="form-control" name="comment" rows="3" cols="100" placeholder=" Comment..." required="True"></textarea>
+                <input class="btn btn-secondary btn-sm mt-1" type="submit" value="Add Comment">
+            </form><br>
+        {% endif %}
+        <ul style="padding-left:0;">
+            {% for comment in comments %}
+                <div class="card">
+                    <div class="card-header">
+                        By <span style="font-weight:bold;">{{ comment.author }}</span> on {{ comment.timestamp }}
+                    </div>
+                    <div class="card-body">
+                        {{ comment.content }}
+                    </div>
+                </div><br>
+            {% empty %}
+                No previous comments.
+            {% endfor %}
+        </ul>
+    </div>
+
+{% endblock %}
